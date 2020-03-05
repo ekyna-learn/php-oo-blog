@@ -1,15 +1,26 @@
 <?php
 
-// admin/category/index.php
+// admin/category/read.php
 
 require '../../bootstrap.php';
 /** @var PDO $connection */
 
 use Repository\CategoryRepository;
 
+// Récupérer l'identifiant dans les paramètres d'URL ($_GET)
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+// Utiliser la méthode findOneById() de la classe CategoryRepository
+// pour récupérer la catégorie correspondant à l'identifiant
 $repository = new CategoryRepository($connection);
 
-$categorys = $repository->findAll();
+$category = $repository->findOneById($id);
+
+// Gérer le cas 404 : 'Catégorie introuvable'
+if (null === $category) {
+    http_response_code(404);
+    exit;
+}
 
 ?>
 <!doctype html>
@@ -22,52 +33,50 @@ $categorys = $repository->findAll();
 <body>
 <!-- Top bar -->
 <?php include PROJECT_ROOT . '/admin/includes/topbar.php'; ?>
+
 <div class="container-fluid">
     <div class="row">
+
         <!-- Sidebar bar -->
         <?php include PROJECT_ROOT . '/admin/includes/sidebar.php'; ?>
+
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Catégories</h1>
+                <h1 class="h2">Détail de la catégorie</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <a href="/admin/category/create.php" class="btn btn-success">
                         Nouvelle catégorie
                     </a>
                 </div>
             </div>
+
             <table class="table">
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>Titre</th>
-                    <th></th>
-                </tr>
-                </thead>
                 <tbody>
-                <?php foreach ($categorys as $category) { ?>
                 <tr>
+                    <th>ID</th>
                     <td>
                         <?php echo $category->getId(); ?>
                     </td>
+                </tr>
+                <tr>
+                    <th>Titre</th>
                     <td>
-                        <a href="/admin/category/read.php?id=<?php echo $category->getId(); ?>">
-                            <?php echo $category->getTitle(); ?>
-                        </a>
-                    </td>
-                    <td class="text-right">
-                        <a href="/admin/category/update.php?id=<?php echo $category->getId(); ?>"
-                           class="btn btn-sm btn-warning">
-                            Modifier
-                        </a>
-                        <a href="/admin/category/delete.php?id=<?php echo $category->getId(); ?>"
-                           class="btn btn-sm btn-danger">
-                            Supprimer
-                        </a>
+                        <?php echo $category->getTitle(); ?>
                     </td>
                 </tr>
-                <?php } ?>
                 </tbody>
             </table>
+
+            <p class="text-right">
+                <a href="/admin/category/update.php?id=<?php echo $category->getId(); ?>"
+                   class="btn btn-sm btn-warning">
+                    Modifier
+                </a>
+                <a href="/admin/category/delete.php?id=<?php echo $category->getId(); ?>"
+                   class="btn btn-sm btn-danger">
+                    Supprimer
+                </a>
+            </p>
 
         </main>
     </div>

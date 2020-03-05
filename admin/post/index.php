@@ -1,5 +1,26 @@
-<!-- Require bootstrap -->
-<?php require '../../bootstrap.php'; ?>
+<?php
+
+// admin/post/index.php
+
+require '../../bootstrap.php';
+/** @var PDO $connection */
+
+use Repository\PostRepository;
+use Repository\AuthorRepository;
+use Repository\CategoryRepository;
+
+$categoryRepository = new CategoryRepository($connection);
+$authorRepository = new AuthorRepository($connection);
+
+$repository = new PostRepository(
+    $connection,
+    $categoryRepository,
+    $authorRepository
+);
+
+$posts = $repository->findAll();
+
+?>
 <!doctype html>
 <html lang="fr">
 <head>
@@ -27,7 +48,55 @@
                 </div>
             </div>
 
-
+            <table class="table">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Titre</th>
+                    <th>Catégorie</th>
+                    <th>Auteur</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($posts as $post) { ?>
+                    <tr>
+                        <td>
+                            <?php echo $post->getId(); ?>
+                        </td>
+                        <td>
+                            <a href="/admin/post/read.php?id=<?php echo $post->getId(); ?>">
+                                <?php echo $post->getTitle(); ?>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/admin/category/read.php?id=<?php echo $post->getCategory()->getId() ?>">
+                                <?php echo $post->getCategory()->getTitle(); ?>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/admin/author/read.php?id=<?php echo $post->getAuthor()->getId(); ?>">
+                                <?php echo $post->getAuthor()->getName(); ?>
+                            </a>
+                        </td>
+                        <td>
+                            <?php echo strftime('%A %e %B %Y', $post->getDate()->getTimestamp()); ?>
+                        </td>
+                        <td class="text-right">
+                            <a href="/admin/post/update.php?id=<?php echo $post->getId(); ?>"
+                               class="btn btn-sm btn-warning">
+                                Modifier
+                            </a>
+                            <a href="/admin/post/delete.php?id=<?php echo $post->getId(); ?>"
+                               class="btn btn-sm btn-danger">
+                                Supprimer
+                            </a>
+                        </td>
+                    </tr>
+                <?php } ?>
+                </tbody>
+            </table>
 
         </main>
     </div>
